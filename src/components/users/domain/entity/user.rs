@@ -15,6 +15,7 @@ impl User {
 }
 
 pub trait UserOperations {
-    async fn get_all(&self) -> Result<Vec<User>, InfrastructureError>;
-    async fn create(&self, username: Username) -> Result<User, InfrastructureError>;
+    async fn get_all(&self) -> Result<Vec<User>, DatabaseError>;
+    async fn get_by_id(&self, id: UserId) -> Result<User, DatabaseError>;
+    async fn create(&self, username: Username) -> Result<User, DatabaseError>;
 }

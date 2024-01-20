@@ -1,5 +1,6 @@
 use crate::prelude::ObjectId;
 
+#[derive(Clone, Debug)]
 pub struct UserId {
     pub value: ObjectId,
 }
