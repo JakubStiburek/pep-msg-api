@@ -58,12 +58,24 @@ pub async fn create_user(mongo_client: web::Data<Client>, dto: web::Json<CreateU
     }
 }
 
-//#[delete("/users/{user_id}")]
-//pub async fn delete_user_by_id(path: web::Path<String>) -> impl Responder {
-//    let user_id = path.into_inner();
-//    HttpResponse::Ok().body(user_id)
-//}
-//
+#[delete("/users/{user_id}")]
+pub async fn delete_user(mongo_client: web::Data<Client>, path: web::Path<String>) -> impl Responder {
+    let user_id = UserIdDto::from_string(path.into_inner());
+    if let Some(dto) = user_id {
+        match delete_user_case(mongo_client, dto).await {
+            Ok(_) => HttpResponse::Ok().finish(),
+            Err(err) => {
+                match err {
+                    DatabaseError::UserNotFound(_) => HttpResponse::NotFound().finish(),
+                    _ => HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
+    } else {
+        HttpResponse::BadRequest().finish()
+    }
+}
+
 
 #[put("/users/{user_id}")]
 pub async fn update_user(mongo_client: web::Data<Client>, path: web::Path<String>, dto: web::Json<CreateUserDto>) -> impl Responder {

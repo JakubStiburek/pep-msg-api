@@ -36,11 +36,11 @@ pub struct UserIdDto {
 }
 
 impl UserIdDto {
-    pub fn from_domain(entity: UserId) -> Self {
-        Self {
-            value: entity.value
-        }
-    }
+    // pub fn from_domain(entity: UserId) -> Self {
+    //     Self {
+    //         value: entity.value
+    //     }
+    // }
     pub fn from_string(id: String) -> Option<Self> {
         match ObjectId::from_str(id.as_str()) {
             Ok(id) => Some(Self { value: id }),

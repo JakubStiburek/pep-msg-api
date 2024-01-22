@@ -84,4 +84,17 @@ impl<'a> UserOperations for UserRepository<'a> {
             }
         }
     }
+    async fn delete(&self, id: UserId) -> Result<(), DatabaseError> {
+        let result = self.collection.find_one_and_delete(doc! {"_id": id.value}, None).await;
+        match result {
+            Ok(res) => {
+                if let Some(_) = res {
+                    Ok(())
+                } else {
+                    Err(DatabaseError::UserNotFound(UserNotFoundError::new(id)))
+                }
+            }
+            Err(_) => Err(DatabaseError::Unhandled(GenericError::new("Unhandled mongo error.")))
+        }
+    }
 }

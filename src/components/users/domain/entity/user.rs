@@ -19,4 +19,6 @@ pub trait UserOperations {
     async fn get_by_id(&self, id: UserId) -> Result<User, DatabaseError>;
     async fn create(&self, username: Username) -> Result<User, DatabaseError>;
     async fn update(&self, id: UserId, username: Username) -> Result<User, DatabaseError>;
+    async fn delete(&self, id: UserId) -> Result<(), DatabaseError>;
+    // todo async fn shallow_delete(&self, id: UserId) -> Result<User, DatabaseError>;
 }
