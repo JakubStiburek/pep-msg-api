@@ -36,7 +36,6 @@ impl<'a> UserOperations for UserRepository<'a> {
         }
     }
     async fn get_by_id(&self, id: UserId) -> Result<User, DatabaseError> {
-        info!("hello");
         let result = self.collection.find_one(Some(doc! {"_id": id.value}), None).await;
         match result {
             Ok(res) => {
@@ -61,6 +60,25 @@ impl<'a> UserOperations for UserRepository<'a> {
             Err(err) => {
                 match *err.kind {
                     Write(_) => Err(DatabaseError::Write(DatabaseWriteError::new(err.to_string()))),
+                    _ => Err(DatabaseError::Unhandled(GenericError::new("Unhandled mongo error.")))
+                }
+            }
+        }
+    }
+    async fn update(&self, id: UserId, username: Username) -> Result<User, DatabaseError> {
+        let result = self.collection.find_one_and_update(doc! {"_id": id.value}, doc! {"$set": doc! {"username": username.value}}, None).await;
+        match result {
+            Ok(res) => {
+                if let Some(document) = res {
+                    Ok(User::new(UserId::new(document._id), Username::new(document.username)))
+                } else {
+                    Err(DatabaseError::UserNotFound(UserNotFoundError::new(id)))
+                }
+            }
+            Err(err) => {
+                match *err.kind {
+                    Write(_) => Err(DatabaseError::Write(DatabaseWriteError::new(err.to_string()))),
+                    Command(err) => Err(DatabaseError::Update(GenericError::new(err.message))),
                     _ => Err(DatabaseError::Unhandled(GenericError::new("Unhandled mongo error.")))
                 }
             }

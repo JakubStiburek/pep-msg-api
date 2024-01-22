@@ -64,8 +64,29 @@ pub async fn create_user(mongo_client: web::Data<Client>, dto: web::Json<CreateU
 //    HttpResponse::Ok().body(user_id)
 //}
 //
-//#[put("/users/{user_id}")]
-//pub async fn update_user(path: web::Path<String>, dto: web::Json<UpdateUserDto>) -> impl Responder {
-//    let user_id = path.into_inner();
-//    HttpResponse::Ok().body(format!("id: {} username: {}", user_id, dto.username))
-//}
+
+#[put("/users/{user_id}")]
+pub async fn update_user(mongo_client: web::Data<Client>, path: web::Path<String>, dto: web::Json<CreateUserDto>) -> impl Responder {
+    let user_id = UserIdDto::from_string(path.into_inner());
+    if let Some(id_dto) = user_id {
+        match update_user_case(mongo_client, id_dto, &dto.username).await {
+            Ok(res) => {
+                let user_dto = UserDto::from_domain(res);
+                match serde_json::to_string(&user_dto) {
+                    Ok(serialized) => HttpResponse::Ok().body(serialized),
+                    Err(_) => HttpResponse::InternalServerError().finish()
+                }
+            }
+            Err(err) => {
+                match err {
+                    DatabaseError::UserNotFound(_) => HttpResponse::NotFound().finish(),
+                    DatabaseError::Write(_) => HttpResponse::BadRequest().finish(),
+                    DatabaseError::Update(_) => HttpResponse::BadRequest().finish(),
+                    _ => HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
+    } else {
+        HttpResponse::BadRequest().finish()
+    }
+}

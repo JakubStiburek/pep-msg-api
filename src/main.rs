@@ -26,6 +26,7 @@ async fn main() -> std::io::Result<()> {
             .service(create_user)
             .service(get_users)
             .service(get_user_by_id)
+            .service(update_user)
             .wrap(Logger::default())
     })
         .bind(("127.0.0.1", 8080))?
