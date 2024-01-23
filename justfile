@@ -1,5 +1,5 @@
 env:
-    source .env
+    source ./.env
 dev:
     cargo run .
 watch:
